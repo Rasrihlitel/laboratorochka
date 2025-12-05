@@ -3,9 +3,7 @@
 #include <time.h>
 #include <locale.h>
 
-float sorttime[6];
-int sortoper[6];
-int quickcom = 0, quickoper = 0, mergecom = 0, mergeoper = 0;
+int quickoper = 0, quickcom = 0, mergeoper = 0, mergecom = 0;
 
 void hello() {
 	printf("0. Выход\n");
@@ -20,25 +18,31 @@ void hello() {
 	printf("9. Сортировка слиянием\n");
 	printf("10. Сравнение сортировок\n");
 	printf("Ваш выбор: ");
-
 }
 
-void output(int* m, int n) {
-	for (int i = 0; i < n; i++) {
+void output(int* m, int s) {
+	for (int i = 0; i < s; i++) {
 		printf("| %d ", m[i]);
 	}
 	printf("|\n");
 }
 
-int* arr(int* m, int* n) {
+void result(int *m, int s, int oper, int com, float time) {
+	if (s < 201) output(m, s);
+	printf("Количество обменов: %d\n", oper);
+	printf("Количество сравнений: %d\n", com);
+	printf("Время %.7f\n", time);
+}
+
+int* arr(int* m, int* s) {
 	int a, b, buff;
 	if (m != NULL) {
 		free(m);
 	}
 	printf("Введите размер массива: ");
-	scanf_s("%d", n);
-	m = (int*)malloc((*n) * sizeof(int));
-	if ((*n) > 10 && (*n) < 201) {
+	scanf_s("%d", s);
+	m = (int*)malloc((*s) * sizeof(int));
+	if ((*s) > 10) {
 		printf("Введите левую границу значений элементов массива: ");
 		scanf_s("%d", &a);
 		printf("Введите правую границу значений элементов массива: ");
@@ -48,50 +52,44 @@ int* arr(int* m, int* n) {
 			a = b;
 			b = buff;
 		}
-		for (int i = 0; i < (*n); i++) {
+		for (int i = 0; i < (*s); i++) {
 			m[i] = a + rand() % (b - a + 1);
 		}
 	}
-	else if ((*n) > 200) {
-		printf("Максимальное кол-во элементов в массиве не может превышать 200\n");
-		return arr(m, n);
-	}
 	else {
 		printf("Введите элементы массива: ");
-		for (int i = 0; i < (*n); i++) {
+		for (int i = 0; i < (*s); i++) {
 			scanf_s("%d", &m[i]);
 		}
+	}
+	if ((*s) > 200) {
+		for (int i = 0; i < 200; i++) {
+			printf("| %d ", m[i]);
+		}
+		printf("|\n");
+	}
+	else {
+		for (int i = 0; i < (*s); i++) {
+			printf("| %d ", m[i]);
+		}
+		printf("|\n");
 	}
 	return m;
 }
 
-int* arr2(int* m, int n) {
-	int* mass = (int*)malloc(sizeof(int) * n);
-	for (int i = 0; i < n; i++) {
+int* arr2(int* m, int s) {
+	int* mass = (int*)malloc(sizeof(int) * s);
+	for (int i = 0; i < s; i++) {
 		mass[i] = m[i];
 	}
 	return mass;
 }
 
-int* sortarr(int* m, int n) {
-	int buff;
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n - 1; j++) {
-			if (m[j] > m[j + 1]) {
-				buff = m[j];
-				m[j] = m[j + 1];
-				m[j + 1] = buff;
-			}
-		}
-	}
-	return m;
-}
-
-void linear(int* m, int n) {
+void linear(int* m, int s) {
 	int el, flag = 0, com = 0;
 	printf("Введите элемент, который вы хотите найти: ");
 	scanf_s("%d", &el);
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < s; i++) {
 		com++;
 		if (el == m[i]) {
 			flag = 1;
@@ -105,8 +103,8 @@ void linear(int* m, int n) {
 	printf("Количество проверок: %d\n", com);
 }
 
-void binear(int* mass, int n) {
-	int first = 0, last = n - 1, mid, el, com = 0, flag = 0;
+void binear(int* mass, int s) {
+	int first = 0, last = s - 1, mid, el, com = 0, flag = 0;
 	printf("Введите элемент, который хотите найти: ");
 	scanf_s("%d", &el);
 	while (first <= last) {
@@ -131,120 +129,93 @@ void binear(int* mass, int n) {
 	printf("Количество сравнений: %d\n", com);
 }
 
-void bubble(int* m, int n) {
+void bubble(int* m, int s, int* bubboper, int*bubbcom) {
 	int buff, oper = 0, com = 0;
-	int* arr = arr2(m, n);
-	clock_t start = clock();
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n - 1; j++) {
+	for (int i = 0; i < s; i++) {
+		for (int j = 0; j < s - 1; j++) {
 			com++;
-			if (arr[j] > arr[j + 1]) {
-				buff = arr[j];
-				arr[j] = arr[j + 1];
-				arr[j + 1] = buff;
+			if (m[j] > m[j + 1]) {
+				buff = m[j];
+				m[j] = m[j + 1];
+				m[j + 1] = buff;
 				oper++;
 			}
 		}
 	}
-	clock_t end = clock();
-	output(arr, n);
-	printf("Количество операций: %d\n", oper);
-	printf("Количество сравнений: %d\n", com);
-	printf("Time: %.6f\n", (float)(end - start) / CLOCKS_PER_SEC);
-	sortoper[0] = oper + com;
-	sorttime[0] = (float)(end - start) / CLOCKS_PER_SEC;
-	free(arr);
+	*bubboper = oper;
+	*bubbcom = com;
 }
 
-void choise(int* m, int n) {
+void choise(int* m, int s, int* chooper, int* chocom) {
 	int imin, buff, oper = 0, com = 0;
-	int* arr = arr2(m, n);
-	clock_t start = clock();
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < s; i++) {
 		imin = i;
-		for (int j = i; j < n; j++) {
+		for (int j = i; j < s; j++) {
 			com++;
-			if (arr[imin] > arr[j]) {
+			if (m[imin] > m[j]) {
 				imin = j;
 			}
 		}
-		buff = arr[imin];
-		arr[imin] = arr[i];
-		arr[i] = buff;
+		buff = m[imin];
+		m[imin] = m[i];
+		m[i] = buff;
 		oper++;
 	}
-	clock_t end = clock();
-	output(arr, n);
-	printf("Количество операций: %d\n", oper);
-	printf("Количество сравнений: %d\n", com);
-	printf("Time: %.6f\n", (float)(end - start) / CLOCKS_PER_SEC);
-	sortoper[1] = oper + com;
-	sorttime[1] = (float)(end - start) / CLOCKS_PER_SEC;
-	free(arr);
+	*chooper = oper;
+	*chocom = com;
 }
 
-void insert(int* m, int n) {
+void insert(int* m, int s, int* insoper, int* inscom) {
 	int copy, pos, oper = 0, com = 0;
-	int* arr = arr2(m, n);
-	clock_t start = clock();
-	for (int i = 1; i < n; i++) {
+	for (int i = 1; i < s; i++) {
 		pos = i;
 		for (int j = 0; j < i; j++) {
 			com++;
-			if (arr[i] <= arr[j]) {
+			if (m[i] <= m[j]) {
 				pos = j;
 				break;
 			}
 		}
-		copy = arr[i];
+		copy = m[i];
 		for (int j = i - 1; j >= pos; j--) {
-			arr[j + 1] = arr[j];
+			m[j + 1] = m[j];
 		}
-		arr[pos] = copy;
+		m[pos] = copy;
 		oper++;
 	}
-	clock_t end = clock();
-	output(arr, n);
-	printf("Количество операций: %d\n", oper);
-	printf("Количество сравнений: %d\n", com);
-	printf("Time: %.6f\n", (float)(end - start) / CLOCKS_PER_SEC);
-	sortoper[2] = oper + com;
-	sorttime[2] = (float)(end - start) / CLOCKS_PER_SEC;
-	free(arr);
+	*insoper = oper;
+	*inscom = com;
 }
 
-void count(int* m, int n) {
-	int max = m[0], oper = 0;
-	for (int i = 0; i < n; i++) {
+void count(int* m, int s, int* countoper, int* countcom) {
+	int max = m[0], min = m[0], range = 0, oper = 0;
+	for (int i = 0; i < s; i++) {
 		if (max <= m[i]) {
 			max = m[i];
 		}
+		if (min >= m[i]) {
+			min = m[i];
+		}
 	}
-
+	if (min < 0) {
+		max = max - min;
+	}
 	int* count = arr2(m, max + 1);
-	int* arr = arr2(m, n);
-	clock_t start = clock();
 	for (int i = 0; i < max + 1; i++) {
 		count[i] = 0;
 	}
-	for (int i = 0; i < n; i++) {
-		count[m[i]]++;
+	for (int i = 0; i < s; i++) {
+		count[m[i] - min]++;
 	}
 	int k = 0;
 	for (int i = 0; i <= max; i++) {
 		for (int j = 0; j < count[i]; j++) {
 			oper++;
-			arr[k++] = i;
+			m[k++] = i + min;
 		}
 	}
-	clock_t end = clock();
-	output(arr, n);
-	printf("Количество опреаций: %d\n", oper);
-	printf("Time: %.6f\n", (float)(end - start) / CLOCKS_PER_SEC);
-	sortoper[3] = oper;
-	sorttime[3] = (float)(end - start) / CLOCKS_PER_SEC;
+	*countoper = oper;
 	free(count);
-	free(arr);
 }
 
 void quick(int* arr, int first, int last) {
@@ -306,11 +277,12 @@ void merge(int* m, int* arr, int first, int mid, int last) {
 			k++;
 			i++;
 		}
-	}
+	}	
 	for (int i = first; i <= last; i++) {
 		m[i] = arr[i];
 		mergeoper++;
 	}
+
 }
 
 void mergesort(int* m, int* arr, int first, int last) {
@@ -321,27 +293,30 @@ void mergesort(int* m, int* arr, int first, int last) {
 	merge(m, arr, first, mid, last);
 }
 
-void info() {
+void info(int obub, float tbub, int ocho, float tcho, int oins, float tins, int ocount, float tcount, float tquick, float tmerge) {
 	printf("Сортировка  |  Время  |   Операции   \n");
 	printf("-------------------------------------\n");
-	printf("Пузырьковая |%.7f| %d\n", sorttime[0], sortoper[0]);
+	printf("Пузырьковая |%.7f| %d\n", tbub, obub);
 	printf("-------------------------------------\n");
-	printf("Выбором     |%.7f| %d\n", sorttime[1], sortoper[1]);
+	printf("Выбором     |%.7f| %d\n", tcho, ocho);
 	printf("-------------------------------------\n");
-	printf("Вставками   |%.7f| %d\n", sorttime[2], sortoper[2]);
+	printf("Вставками   |%.7f| %d\n", tins, oins);
 	printf("-------------------------------------\n");
-	printf("Подсчётом   |%.7f| %d\n", sorttime[3], sortoper[3]);
+	printf("Подсчётом   |%.7f| %d\n", tcount, ocount);
 	printf("-------------------------------------\n");
-	printf("Быстрая     |%.7f| %d\n", sorttime[4], sortoper[4]);
+	printf("Быстрая     |%.7f| %d\n", tquick, quickoper + quickcom);
 	printf("-------------------------------------\n");
-	printf("Слиянием    |%.7f| %d\n", sorttime[5], sortoper[5]);
+	printf("Слиянием    |%.7f| %d\n", tmerge, mergeoper + mergecom);
 	printf("-------------------------------------\n");
 }
 
 int main() {
 	srand(time(0));
 	setlocale(LC_ALL, "rus");
-	int* m = nullptr, n, code, turn, flag = 0, f, * sortm = nullptr, * arrm = nullptr;
+	int* m = nullptr, s, code, turn, flag = 0, f, * arrm = nullptr, * arrm2 = nullptr;
+	int bubbcom, bubboper, chooper, chocom, inscom, insoper, countcom, countoper, musor = 0;
+	float bubbtime, chotime, instime, counttime, quicktime, mergetime;
+	int case1, case2, case3, case4, case5, case6;
 	clock_t start, end;
 	do {
 		hello();
@@ -349,74 +324,98 @@ int main() {
 		switch (code) {
 		case 0: break;
 		case 1: flag = 1; f = 0;
-			m = arr(m, &n);
-			sortm = arr2(m, n);
-			sortarr(sortm, n);
-			for (int i = 0; i < 6; i++) {
-				sorttime[i] = 0;
-				sortoper[i] = 0;
-			}
-			quickcom = 0; quickoper = 0; mergecom = 0; mergeoper = 0;
-			output(m, n);
-			break;
+			  case1 = case2 = case3 = case4 = case5 = case6 = 0;
+			  m = arr(m, &s);
+			  break;
 
 		case 2: if (flag == 0) {
 			printf("Сначала заполните массив\n");
 			break;
 		}
-			  linear(m, n); break;
+			  linear(m, s); break;
 
-		case 3:
-			if (flag == 0) {
-				printf("Сначала заполните массив\n");
-				break;
-			}
+		case 3:if (flag == 0) {
+			printf("Сначала заполните массив\n");
+			break;
+		}
 			if (f == 0) {
 				printf("Сначала отсортируйте массив\n");
 				break;
 			}
-			binear(sortm, n);
-			break;
+			  musor = 0;
+			  arrm = arr2(m, s);
+			  insert(arrm, s, &musor, &musor);
+			  binear(arrm, s);
+			  free(arrm);
+			  break;
 
 		case 4: if (flag == 0) {
 			printf("Сначала заполните массив\n");
 			break;
 		}
-			  bubble(m, n); f++; break;
+			  bubbcom = bubboper = 0; bubbtime = 0; case1 = 1;
+			  arrm = arr2(m, s);
+			  start = clock();
+			  bubble(arrm, s, &bubboper, &bubbcom);
+			  end = clock();
+			  bubbtime = ((float)(end - start)) / CLOCKS_PER_SEC; f++;
+			  result(arrm, s, bubboper, bubbcom, bubbtime);
+			  free(arrm);
+			  break;
 
 		case 5: if (flag == 0) {
 			printf("Сначала заполните массив\n");
 			break;
-		}
-			  choise(m, n); f++; break;
+		}		
+			  chooper = chocom = 0; chotime = 0; case2 = 1;
+			  arrm = arr2(m, s);
+			  start = clock();
+			  choise(arrm, s, &chooper, &chocom);
+			  end = clock();
+			  chotime = ((float)(end - start)) / CLOCKS_PER_SEC; f++;
+			  result(arrm, s, chooper, chocom, chotime);
+			  free(arrm);
+			  break;
 
 		case 6: if (flag == 0) {
 			printf("Сначала заполните массив\n");
 			break;
 		}
-			  insert(m, n); f++; break;
+			  inscom = insoper = 0; instime = 0; case3 = 1;
+			  arrm = arr2(m, s);
+			  start = clock();
+			  insert(arrm, s, &insoper, &inscom);
+			  end = clock();
+			  instime = ((float)(end - start)) / CLOCKS_PER_SEC; f++;
+			  result(arrm, s, insoper, inscom, instime);
+			  free(arrm);
+			  break;
 
 		case 7: if (flag == 0) {
 			printf("Сначала заполните массив\n");
 			break;
 		}
-			  count(m, n); f++; break;
+			  countcom = countoper = 0; counttime = 0; case4 = 1;
+			  arrm = arr2(m, s);
+			  start = clock();
+			  count(arrm, s, &countoper, &countcom);
+			  end = clock();
+			  counttime = ((float)(end - start)) / CLOCKS_PER_SEC; f++;
+			  result(arrm, s, countoper, countcom, counttime);
+			  free(arrm);
+			  break;
 
 		case 8: if (flag == 0) {
 			printf("Сначала заполните массив\n");
 			break;
 		}
-			  f++;
-			  arrm = arr2(m, n);
+			  quickoper = quickcom = 0; quicktime = 0; case5 = 1;
+			  arrm = arr2(m, s);
 			  start = clock();
-			  quick(arrm, 0, n - 1);	
+			  quick(arrm, 0, s - 1);	
 			  end = clock();
-			  output(arrm, n);
-			  sortoper[4] = quickoper + quickcom;
-			  sorttime[4] = (float)(end - start) / CLOCKS_PER_SEC;
-			  printf("Количество операций: %d\n", quickoper);
-			  printf("Количество сравнений: %d\n", quickcom);
-			  printf("Time: %.6f\n", (float)(end - start) / CLOCKS_PER_SEC);
+			  quicktime = ((float)(end - start)) / CLOCKS_PER_SEC; f++;
+			  result(arrm, s, quickoper, quickcom, quicktime);
 			  free(arrm);
 			  break;
 
@@ -424,29 +423,27 @@ int main() {
 			printf("Сначала заполните массив\n");
 			break;
 		}
-			  f++;
-			  arrm = arr2(m, n);
+			  mergeoper = mergecom = 0;	mergetime = 0; case6 = 1;
+			  arrm = arr2(m, s);
+			  arrm2 = arr2(m, s);
 			  start = clock();
-			  mergesort(m, arrm, 0, n - 1);
+			  mergesort(arrm, arrm2, 0, s - 1);
 			  end = clock();
-			  output(arrm, n);
-			  sortoper[5] = mergeoper + mergecom;
-			  sorttime[5] = (float)(end - start) / CLOCKS_PER_SEC;
-			  printf("Количество операций: %d\n", mergeoper);
-			  printf("Количество сравнений: %d\n", mergecom);
-			  printf("Time: %.6f\n", (float)(end - start) / CLOCKS_PER_SEC);
+			  mergetime = ((float)(end - start)) / CLOCKS_PER_SEC; f++;
+			  result(arrm, s, mergeoper, mergecom, mergetime);
 			  free(arrm);
+			  free(arrm2);
 			  break;
 
 		case 10:  if (flag == 0) {
 			printf("Сначала заполните массив\n");
 			break;
 		}
-			   if (f != 6) {
+			   if ((case1==0) || (case2==0) || (case3==0) || (case4==0) || (case5==0) || (case6==0)) {
 				   printf("Сначала опробуйте все сортировки, прежде чем их сравнивать\n");
 				   break;
 			   }
-			   info();
+			   info(bubboper+bubbcom,bubbtime,chooper+chocom,chotime,insoper+inscom,instime,countoper+countcom,counttime,quicktime,mergetime);
 			   break;
 
 		default: if (turn == 0) {
@@ -462,9 +459,6 @@ int main() {
 
 	if (m != NULL) {
 		free(m);
-	}
-	if (sortm != NULL) {
-		free(sortm);
 	}
 	return 0;
 }
